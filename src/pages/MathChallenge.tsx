@@ -67,13 +67,11 @@ const MathChallenge = () => {
 
     setAttempts(attempts + 1);
 
-    setTimeout(() => {
-      if (attempts + 1 >= totalProblems) {
-        handleComplete();
-      } else {
-        generateProblem();
-      }
-    }, 1000);
+    if (attempts + 1 >= totalProblems) {
+      setTimeout(() => handleComplete(), 1000);
+    } else {
+      setTimeout(() => generateProblem(), 1000);
+    }
   };
 
   const handleComplete = () => {

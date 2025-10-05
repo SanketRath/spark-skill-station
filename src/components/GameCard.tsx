@@ -19,10 +19,11 @@ export const GameCard = ({ title, description, icon: Icon, route, comingSoon }: 
       className={`
         relative overflow-hidden bg-gradient-card border-border shadow-card
         transition-all duration-300 hover:shadow-card-hover hover:scale-[1.02]
+        h-full flex flex-col
         ${comingSoon ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}
       `}
     >
-      <div className="p-6 space-y-4">
+      <div className="p-6 space-y-4 flex-1 flex flex-col">
         <div className="flex items-center justify-between">
           <div className="p-3 rounded-lg bg-gradient-primary">
             <Icon className="w-8 h-8 text-primary-foreground" />
@@ -34,7 +35,7 @@ export const GameCard = ({ title, description, icon: Icon, route, comingSoon }: 
           )}
         </div>
         
-        <div className="space-y-2">
+        <div className="space-y-2 flex-1">
           <h3 className="text-xl font-bold text-foreground">{title}</h3>
           <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
         </div>

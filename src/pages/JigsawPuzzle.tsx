@@ -16,6 +16,7 @@ const JigsawPuzzle = () => {
   const [pieces, setPieces] = useState<PuzzlePiece[]>([]);
   const [selectedPiece, setSelectedPiece] = useState<number | null>(null);
   const [moves, setMoves] = useState(0);
+  const [draggedPiece, setDraggedPiece] = useState<number | null>(null);
 
   useEffect(() => {
     initializePuzzle();
@@ -60,6 +61,37 @@ const JigsawPuzzle = () => {
 
   const isPuzzleSolved = pieces.every(piece => piece.currentPosition === piece.correctPosition);
 
+  useEffect(() => {
+    if (isPuzzleSolved && pieces.length > 0) {
+      setTimeout(() => handleComplete(), 500);
+    }
+  }, [isPuzzleSolved, pieces]);
+
+  const handleDragStart = (position: number) => {
+    setDraggedPiece(position);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (position: number) => {
+    if (draggedPiece === null) return;
+    
+    setPieces(prev => {
+      const newPieces = [...prev];
+      const piece1Index = newPieces.findIndex(p => p.currentPosition === draggedPiece);
+      const piece2Index = newPieces.findIndex(p => p.currentPosition === position);
+      
+      newPieces[piece1Index].currentPosition = position;
+      newPieces[piece2Index].currentPosition = draggedPiece;
+      
+      return newPieces;
+    });
+    setDraggedPiece(null);
+    setMoves(m => m + 1);
+  };
+
   const handleComplete = () => {
     const timeTaken = Math.floor((Date.now() - startTime) / 1000);
     navigate("/analytics", {
@@ -98,8 +130,12 @@ const JigsawPuzzle = () => {
               const isCorrect = piece?.currentPosition === piece?.correctPosition;
 
               return (
-                <button
+                <div
                   key={position}
+                  draggable
+                  onDragStart={() => handleDragStart(position)}
+                  onDragOver={handleDragOver}
+                  onDrop={() => handleDrop(position)}
                   onClick={() => handlePieceClick(position)}
                   className={`
                     aspect-square rounded-lg transition-all duration-300 relative
@@ -110,16 +146,16 @@ const JigsawPuzzle = () => {
                       ? 'bg-success text-success-foreground'
                       : 'bg-gradient-primary text-primary-foreground hover:scale-105'
                     }
-                    shadow-card cursor-pointer
+                    shadow-card cursor-move
                   `}
                 >
                   {piece && (
-                    <div className="flex flex-col items-center">
+                    <div className="flex flex-col items-center pointer-events-none">
                       <span>{piece.id + 1}</span>
                       {isCorrect && <span className="text-sm">✓</span>}
                     </div>
                   )}
-                </button>
+                </div>
               );
             })}
           </div>

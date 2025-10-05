@@ -45,7 +45,7 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-12">
-        <div className="text-center mb-12 space-y-4 animate-fade-in">
+        <div className="text-center mb-12 space-y-6 animate-fade-in">
           <h1 className="text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent">
             Brain Training Games
           </h1>

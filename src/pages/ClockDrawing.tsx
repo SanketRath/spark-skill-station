@@ -132,6 +132,13 @@ const ClockDrawing = () => {
             >
               Clear Canvas
             </Button>
+            <Button
+              onClick={handleComplete}
+              disabled={!hasDrawn}
+              className="bg-gradient-primary text-primary-foreground shadow-button hover:opacity-90 disabled:opacity-50"
+            >
+              Submit Drawing
+            </Button>
           </div>
         </div>
 

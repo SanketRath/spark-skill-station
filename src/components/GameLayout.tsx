@@ -43,11 +43,11 @@ export const GameLayout = ({
       <div className="flex items-center justify-between p-4 border-b border-border">
         <Button
           variant="ghost"
-          size="icon"
           onClick={() => navigate("/")}
-          className="hover:bg-muted"
+          className="hover:bg-muted gap-2"
         >
           <Home className="w-5 h-5" />
+          <span>Home</span>
         </Button>
 
         <h1 className="text-2xl font-bold text-foreground">{title}</h1>
@@ -71,7 +71,10 @@ export const GameLayout = ({
           <div className="flex gap-3">
             <Button
               variant="outline"
-              onClick={onGiveUp}
+              onClick={() => {
+                onGiveUp();
+                onNext();
+              }}
               className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
             >
               Give Up

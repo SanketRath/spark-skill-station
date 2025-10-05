@@ -86,6 +86,12 @@ const MemoryMatch = () => {
 
   const allMatched = cards.length > 0 && cards.every(card => card.isMatched);
 
+  useEffect(() => {
+    if (allMatched) {
+      setTimeout(() => handleComplete(), 500);
+    }
+  }, [allMatched]);
+
   return (
     <GameLayout
       title="Memory Match"

@@ -11,7 +11,9 @@ const WordSearch = () => {
   const [grid, setGrid] = useState<string[][]>([]);
   const [foundWords, setFoundWords] = useState<string[]>([]);
   const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
+  const [foundCells, setFoundCells] = useState<Set<string>>(new Set());
   const [isSelecting, setIsSelecting] = useState(false);
+  const [wordPositions, setWordPositions] = useState<Map<string, string[]>>(new Map());
 
   useEffect(() => {
     generateGrid();
@@ -24,47 +26,69 @@ const WordSearch = () => {
       )
     );
 
+    const positions = new Map<string, string[]>();
+
     // Place words horizontally
     WORDS.forEach((word, idx) => {
       const row = idx * 2;
       const startCol = Math.floor(Math.random() * (GRID_SIZE - word.length));
+      const wordCells: string[] = [];
       for (let i = 0; i < word.length; i++) {
         newGrid[row][startCol + i] = word[i];
+        wordCells.push(`${row}-${startCol + i}`);
       }
+      positions.set(word, wordCells);
     });
 
     setGrid(newGrid);
+    setWordPositions(positions);
   };
 
-  const handleCellClick = (row: number, col: number) => {
+  const handleMouseDown = (row: number, col: number) => {
+    setIsSelecting(true);
     const cellKey = `${row}-${col}`;
-    const newSelected = new Set(selectedCells);
-    
-    if (newSelected.has(cellKey)) {
-      newSelected.delete(cellKey);
-    } else {
-      newSelected.add(cellKey);
-    }
-    
-    setSelectedCells(newSelected);
-    checkForWord(newSelected);
+    setSelectedCells(new Set([cellKey]));
+  };
+
+  const handleMouseEnter = (row: number, col: number) => {
+    if (!isSelecting) return;
+    const cellKey = `${row}-${col}`;
+    setSelectedCells(prev => new Set([...prev, cellKey]));
+  };
+
+  const handleMouseUp = () => {
+    setIsSelecting(false);
+    checkForWord(selectedCells);
   };
 
   const checkForWord = (selected: Set<string>) => {
-    const selectedLetters = Array.from(selected)
-      .sort()
-      .map(key => {
-        const [row, col] = key.split('-').map(Number);
-        return grid[row]?.[col];
-      })
-      .join('');
-
+    const selectedArray = Array.from(selected);
+    
     WORDS.forEach(word => {
-      if (selectedLetters.includes(word) && !foundWords.includes(word)) {
+      if (foundWords.includes(word)) return;
+      
+      const positions = wordPositions.get(word);
+      if (!positions) return;
+      
+      const allFound = positions.every(pos => selectedArray.includes(pos));
+      
+      if (allFound) {
         setFoundWords([...foundWords, word]);
+        setFoundCells(prev => new Set([...prev, ...positions]));
         setSelectedCells(new Set());
+        
+        if (foundWords.length + 1 === WORDS.length) {
+          setTimeout(() => handleComplete(), 500);
+        }
       }
     });
+    
+    if (!foundWords.some(word => {
+      const positions = wordPositions.get(word);
+      return positions?.every(pos => selectedArray.includes(pos));
+    })) {
+      setTimeout(() => setSelectedCells(new Set()), 300);
+    }
   };
 
   const handleComplete = () => {
@@ -106,18 +130,27 @@ const WordSearch = () => {
         </div>
 
         <div className="bg-card rounded-lg p-6 shadow-card">
-          <div className="inline-grid gap-1" style={{ gridTemplateColumns: `repeat(${GRID_SIZE}, minmax(0, 1fr))` }}>
+          <div 
+            className="inline-grid gap-1 select-none" 
+            style={{ gridTemplateColumns: `repeat(${GRID_SIZE}, minmax(0, 1fr))` }}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={() => setIsSelecting(false)}
+          >
             {grid.map((row, rowIdx) =>
               row.map((letter, colIdx) => {
                 const cellKey = `${rowIdx}-${colIdx}`;
                 const isSelected = selectedCells.has(cellKey);
+                const isFound = foundCells.has(cellKey);
                 return (
                   <button
                     key={cellKey}
-                    onClick={() => handleCellClick(rowIdx, colIdx)}
+                    onMouseDown={() => handleMouseDown(rowIdx, colIdx)}
+                    onMouseEnter={() => handleMouseEnter(rowIdx, colIdx)}
                     className={`
-                      w-10 h-10 rounded font-bold text-sm transition-all
-                      ${isSelected 
+                      w-10 h-10 rounded font-bold text-sm transition-all cursor-pointer
+                      ${isFound
+                        ? 'bg-success text-success-foreground'
+                        : isSelected 
                         ? 'bg-gradient-primary text-primary-foreground scale-110' 
                         : 'bg-muted hover:bg-muted-foreground/10 text-foreground'
                       }
