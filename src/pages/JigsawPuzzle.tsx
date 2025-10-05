@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { GameLayout } from "@/components/GameLayout";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+
+const THEMES = ["nature", "films", "sports", "food", "hobbies"];
 
 interface PuzzlePiece {
   id: number;
@@ -12,15 +17,51 @@ const GRID_SIZE = 3; // 3x3 puzzle
 
 const JigsawPuzzle = () => {
   const navigate = useNavigate();
-  const [startTime] = useState(Date.now());
+  const { toast } = useToast();
+  const [setupComplete, setSetupComplete] = useState(false);
+  const [theme, setTheme] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [generatedImage, setGeneratedImage] = useState("");
+  const [startTime, setStartTime] = useState(Date.now());
   const [pieces, setPieces] = useState<PuzzlePiece[]>([]);
   const [selectedPiece, setSelectedPiece] = useState<number | null>(null);
   const [moves, setMoves] = useState(0);
   const [draggedPiece, setDraggedPiece] = useState<number | null>(null);
 
+  const handleStartGame = async () => {
+    if (!theme) {
+      toast({ title: "Please select a theme", variant: "destructive" });
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-image', {
+        body: { theme }
+      });
+      
+      if (error) throw error;
+      
+      setGeneratedImage(data.imageUrl);
+      setSetupComplete(true);
+      setStartTime(Date.now());
+    } catch (error) {
+      console.error('Error generating image:', error);
+      toast({ 
+        title: "Error generating image", 
+        description: "Please try again",
+        variant: "destructive" 
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    initializePuzzle();
-  }, []);
+    if (setupComplete) {
+      initializePuzzle();
+    }
+  }, [setupComplete]);
 
   const initializePuzzle = () => {
     const totalPieces = GRID_SIZE * GRID_SIZE;
@@ -108,6 +149,42 @@ const JigsawPuzzle = () => {
     return pieces.find(p => p.currentPosition === position);
   };
 
+  if (!setupComplete) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="w-full max-w-md space-y-6">
+          <div className="text-center space-y-2">
+            <h1 className="text-4xl font-bold text-foreground">Jigsaw Puzzle</h1>
+            <p className="text-muted-foreground">Select a theme for your puzzle</p>
+          </div>
+
+          <div className="bg-card rounded-lg p-6 shadow-card space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              {THEMES.map((t) => (
+                <Button
+                  key={t}
+                  onClick={() => setTheme(t)}
+                  variant={theme === t ? "default" : "outline"}
+                  className="capitalize"
+                >
+                  {t}
+                </Button>
+              ))}
+            </div>
+
+            <Button
+              onClick={handleStartGame}
+              disabled={!theme || loading}
+              className="w-full mt-6"
+            >
+              {loading ? "Generating Puzzle..." : "Start Game"}
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <GameLayout
       title="Jigsaw Puzzle"
@@ -139,20 +216,24 @@ const JigsawPuzzle = () => {
                   onClick={() => handlePieceClick(position)}
                   className={`
                     aspect-square rounded-lg transition-all duration-300 relative
-                    flex items-center justify-center text-4xl font-bold
+                    overflow-hidden
                     ${isSelected 
-                      ? 'bg-gradient-accent text-accent-foreground scale-105 shadow-card-hover' 
+                      ? 'scale-105 shadow-card-hover ring-4 ring-primary' 
                       : isCorrect
-                      ? 'bg-success text-success-foreground'
-                      : 'bg-gradient-primary text-primary-foreground hover:scale-105'
+                      ? 'ring-4 ring-success'
+                      : 'hover:scale-105'
                     }
                     shadow-card cursor-move
                   `}
+                  style={{
+                    backgroundImage: `url(${generatedImage})`,
+                    backgroundSize: `${GRID_SIZE * 100}%`,
+                    backgroundPosition: `${(piece!.correctPosition % GRID_SIZE) * 100 / (GRID_SIZE - 1)}% ${Math.floor(piece!.correctPosition / GRID_SIZE) * 100 / (GRID_SIZE - 1)}%`
+                  }}
                 >
-                  {piece && (
-                    <div className="flex flex-col items-center pointer-events-none">
-                      <span>{piece.id + 1}</span>
-                      {isCorrect && <span className="text-sm">✓</span>}
+                  {isCorrect && (
+                    <div className="absolute inset-0 bg-success/20 flex items-center justify-center">
+                      <span className="text-4xl">✓</span>
                     </div>
                   )}
                 </div>

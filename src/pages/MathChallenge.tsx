@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { GameLayout } from "@/components/GameLayout";
 import { Input } from "@/components/ui/input";
@@ -9,25 +9,49 @@ interface Problem {
   answer: number;
 }
 
+const DIFFICULTY_CONFIG = {
+  easy: { range: 10, operations: ["+", "-"], problems: 10, label: "Easy" },
+  medium: { range: 20, operations: ["+", "-", "×"], problems: 15, label: "Medium" },
+  hard: { range: 50, operations: ["+", "-", "×"], problems: 20, label: "Difficult" }
+};
+
 const MathChallenge = () => {
   const navigate = useNavigate();
-  const [startTime] = useState(Date.now());
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [setupComplete, setSetupComplete] = useState(false);
+  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('easy');
+  const [startTime, setStartTime] = useState(Date.now());
   const [currentProblem, setCurrentProblem] = useState<Problem | null>(null);
   const [userAnswer, setUserAnswer] = useState("");
   const [score, setScore] = useState(0);
   const [attempts, setAttempts] = useState(0);
   const [feedback, setFeedback] = useState<"correct" | "incorrect" | null>(null);
-  const totalProblems = 10;
+  const [totalProblems, setTotalProblems] = useState(10);
+
+  const handleStartGame = () => {
+    setSetupComplete(true);
+    setStartTime(Date.now());
+    const config = DIFFICULTY_CONFIG[difficulty];
+    setTotalProblems(config.problems);
+  };
 
   useEffect(() => {
-    generateProblem();
-  }, []);
+    if (setupComplete) {
+      generateProblem();
+    }
+  }, [setupComplete]);
+
+  useEffect(() => {
+    if (setupComplete && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [currentProblem, setupComplete]);
 
   const generateProblem = () => {
-    const num1 = Math.floor(Math.random() * 20) + 1;
-    const num2 = Math.floor(Math.random() * 20) + 1;
-    const operations = ["+", "-", "×"];
-    const operation = operations[Math.floor(Math.random() * operations.length)];
+    const config = DIFFICULTY_CONFIG[difficulty];
+    const num1 = Math.floor(Math.random() * config.range) + 1;
+    const num2 = Math.floor(Math.random() * config.range) + 1;
+    const operation = config.operations[Math.floor(Math.random() * config.operations.length)];
 
     let answer: number;
     let question: string;
@@ -86,6 +110,36 @@ const MathChallenge = () => {
     });
   };
 
+  if (!setupComplete) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="w-full max-w-md space-y-6">
+          <div className="text-center space-y-2">
+            <h1 className="text-4xl font-bold text-foreground">Math Challenge</h1>
+            <p className="text-muted-foreground">Select difficulty level</p>
+          </div>
+
+          <div className="bg-card rounded-lg p-6 shadow-card space-y-4">
+            {(Object.keys(DIFFICULTY_CONFIG) as Array<keyof typeof DIFFICULTY_CONFIG>).map((diff) => (
+              <Button
+                key={diff}
+                onClick={() => setDifficulty(diff)}
+                variant={difficulty === diff ? "default" : "outline"}
+                className="w-full"
+              >
+                {DIFFICULTY_CONFIG[diff].label}
+              </Button>
+            ))}
+
+            <Button onClick={handleStartGame} className="w-full mt-6">
+              Start Game
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <GameLayout
       title="Math Challenge"
@@ -107,6 +161,7 @@ const MathChallenge = () => {
               </div>
 
               <Input
+                ref={inputRef}
                 type="number"
                 value={userAnswer}
                 onChange={(e) => setUserAnswer(e.target.value)}
@@ -114,6 +169,7 @@ const MathChallenge = () => {
                 placeholder="Your answer"
                 className="text-2xl text-center h-16"
                 disabled={feedback !== null}
+                autoFocus
               />
 
               <Button
