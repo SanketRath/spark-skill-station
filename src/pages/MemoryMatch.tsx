@@ -65,6 +65,14 @@ const MemoryMatch = () => {
     }
   }, [flippedIndices, cards]);
 
+  const allMatched = cards.length > 0 && cards.every(card => card.isMatched);
+
+  useEffect(() => {
+    if (allMatched) {
+      setTimeout(() => handleComplete(), 500);
+    }
+  }, [allMatched]);
+
   const initializeCards = () => {
     const config = DIFFICULTY_CONFIG[difficulty];
     const emojis = EMOJI_SETS[difficulty].slice(0, config.pairs);
@@ -139,13 +147,6 @@ const MemoryMatch = () => {
     );
   }
 
-  const allMatched = cards.length > 0 && cards.every(card => card.isMatched);
-
-  useEffect(() => {
-    if (allMatched) {
-      setTimeout(() => handleComplete(), 500);
-    }
-  }, [allMatched]);
 
   return (
     <GameLayout
