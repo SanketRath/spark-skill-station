@@ -75,7 +75,11 @@ const WordSearch = () => {
       { dx: 1, dy: 0, name: 'horizontal' },      // left to right
       { dx: -1, dy: 0, name: 'horizontal-rev' }, // right to left
       { dx: 0, dy: 1, name: 'vertical' },        // top to bottom
-      { dx: 0, dy: -1, name: 'vertical-rev' }    // bottom to top
+      { dx: 0, dy: -1, name: 'vertical-rev' },   // bottom to top
+      { dx: 1, dy: 1, name: 'diagonal-down' },   // diagonal down-right
+      { dx: -1, dy: -1, name: 'diagonal-up' },   // diagonal up-left
+      { dx: 1, dy: -1, name: 'diagonal-up-right' }, // diagonal up-right
+      { dx: -1, dy: 1, name: 'diagonal-down-left' } // diagonal down-left
     ];
 
     words.forEach((word) => {
@@ -88,18 +92,34 @@ const WordSearch = () => {
         
         let startRow, startCol;
         
-        if (dx === 1) {
+        if (dx === 1 && dy === 0) {
           startRow = Math.floor(Math.random() * calculatedGridSize);
           startCol = Math.floor(Math.random() * (calculatedGridSize - word.length + 1));
-        } else if (dx === -1) {
+        } else if (dx === -1 && dy === 0) {
           startRow = Math.floor(Math.random() * calculatedGridSize);
           startCol = word.length - 1 + Math.floor(Math.random() * (calculatedGridSize - word.length + 1));
-        } else if (dy === 1) {
+        } else if (dx === 0 && dy === 1) {
           startRow = Math.floor(Math.random() * (calculatedGridSize - word.length + 1));
           startCol = Math.floor(Math.random() * calculatedGridSize);
-        } else {
+        } else if (dx === 0 && dy === -1) {
           startRow = word.length - 1 + Math.floor(Math.random() * (calculatedGridSize - word.length + 1));
           startCol = Math.floor(Math.random() * calculatedGridSize);
+        } else if (dx === 1 && dy === 1) {
+          // diagonal down-right
+          startRow = Math.floor(Math.random() * (calculatedGridSize - word.length + 1));
+          startCol = Math.floor(Math.random() * (calculatedGridSize - word.length + 1));
+        } else if (dx === -1 && dy === -1) {
+          // diagonal up-left
+          startRow = word.length - 1 + Math.floor(Math.random() * (calculatedGridSize - word.length + 1));
+          startCol = word.length - 1 + Math.floor(Math.random() * (calculatedGridSize - word.length + 1));
+        } else if (dx === 1 && dy === -1) {
+          // diagonal up-right
+          startRow = word.length - 1 + Math.floor(Math.random() * (calculatedGridSize - word.length + 1));
+          startCol = Math.floor(Math.random() * (calculatedGridSize - word.length + 1));
+        } else {
+          // diagonal down-left
+          startRow = Math.floor(Math.random() * (calculatedGridSize - word.length + 1));
+          startCol = word.length - 1 + Math.floor(Math.random() * (calculatedGridSize - word.length + 1));
         }
         
         let canPlace = true;

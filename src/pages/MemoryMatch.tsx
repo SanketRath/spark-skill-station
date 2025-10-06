@@ -12,8 +12,8 @@ interface Card {
 
 const EMOJI_SETS = {
   easy: ["🧠", "🎯", "⭐", "🎨", "🔥", "💡", "🎭", "🌟"],
-  medium: ["🧠", "🎯", "⭐", "🎨", "🔥", "💡", "🎭", "🌟", "🚀", "🌈", "🎪", "🎸", "🎮", "🎲", "🎺", "🎻", "🏆", "🌺"],
-  hard: ["🧠", "🎯", "⭐", "🎨", "🔥", "💡", "🎭", "🌟", "🚀", "🌈", "🎪", "🎸", "🎮", "🎲", "🎺", "🎻", "🏆", "🌺", "🎪", "🎨", "🎭", "🌟", "🔥", "💡", "🚀", "🌈", "🎸", "🎮", "🎲", "🎺", "🏆", "🌺"]
+  medium: ["🚀", "🌈", "🎪", "🎸", "🎮", "🎲", "🎺", "🎻", "🏆", "🌺", "🦄", "🎁", "🌸", "🎃", "🎄", "🎈", "🎉", "🎊"],
+  hard: ["🍎", "🍌", "🍇", "🍊", "🍓", "🍉", "🍒", "🍑", "🥝", "🍍", "🥥", "🥭", "🍏", "🍐", "🫐", "🍋", "🍈", "🍆", "🥑", "🌽", "🥕", "🥒", "🧅", "🧄", "🥦", "🥬", "🫑", "🥗", "🍄", "🥜", "🌰", "🍞"]
 };
 
 const DIFFICULTY_CONFIG = {
@@ -41,7 +41,7 @@ const MemoryMatch = () => {
     if (setupComplete) {
       initializeCards();
     }
-  }, [setupComplete]);
+  }, [setupComplete, difficulty]);
 
   useEffect(() => {
     if (flippedIndices.length === 2) {
@@ -168,7 +168,7 @@ const MemoryMatch = () => {
               onClick={() => handleCardClick(index)}
               disabled={card.isMatched || card.isFlipped}
               className={`
-                aspect-square rounded-lg text-5xl font-bold transition-all duration-300
+                aspect-square rounded-lg text-6xl font-bold transition-all duration-300 flex items-center justify-center
                 ${card.isFlipped || card.isMatched
                   ? 'bg-gradient-primary text-primary-foreground'
                   : 'bg-muted hover:bg-muted-foreground/10'

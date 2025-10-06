@@ -58,10 +58,10 @@ const JigsawPuzzle = () => {
   };
 
   useEffect(() => {
-    if (setupComplete) {
+    if (setupComplete && generatedImage) {
       initializePuzzle();
     }
-  }, [setupComplete]);
+  }, [setupComplete, generatedImage]);
 
   const initializePuzzle = () => {
     const totalPieces = GRID_SIZE * GRID_SIZE;

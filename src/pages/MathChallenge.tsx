@@ -39,7 +39,7 @@ const MathChallenge = () => {
     if (setupComplete) {
       generateProblem();
     }
-  }, [setupComplete]);
+  }, [setupComplete, difficulty]);
 
   useEffect(() => {
     if (setupComplete && inputRef.current) {

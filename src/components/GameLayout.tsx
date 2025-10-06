@@ -44,7 +44,7 @@ export const GameLayout = ({
         <Button
           variant="ghost"
           onClick={() => navigate("/")}
-          className="hover:bg-muted gap-2"
+          className="hover:bg-primary hover:text-primary-foreground gap-2 scale-150 transition-all"
         >
           <Home className="w-5 h-5" />
           <span>Home</span>
