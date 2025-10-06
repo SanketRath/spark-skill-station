@@ -206,6 +206,8 @@ const JigsawPuzzle = () => {
               const isSelected = selectedPiece === position;
               const isCorrect = piece?.currentPosition === piece?.correctPosition;
 
+              if (!piece) return null;
+
               return (
                 <div
                   key={position}
@@ -228,7 +230,7 @@ const JigsawPuzzle = () => {
                   style={{
                     backgroundImage: `url(${generatedImage})`,
                     backgroundSize: `${GRID_SIZE * 100}%`,
-                    backgroundPosition: `${(piece!.correctPosition % GRID_SIZE) * 100 / (GRID_SIZE - 1)}% ${Math.floor(piece!.correctPosition / GRID_SIZE) * 100 / (GRID_SIZE - 1)}%`
+                    backgroundPosition: `${(piece.correctPosition % GRID_SIZE) * 100 / (GRID_SIZE - 1)}% ${Math.floor(piece.correctPosition / GRID_SIZE) * 100 / (GRID_SIZE - 1)}%`
                   }}
                 >
                   {isCorrect && (
