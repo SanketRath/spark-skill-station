@@ -102,12 +102,6 @@ const JigsawPuzzle = () => {
 
   const isPuzzleSolved = pieces.every(piece => piece.currentPosition === piece.correctPosition);
 
-  useEffect(() => {
-    if (isPuzzleSolved && pieces.length > 0) {
-      setTimeout(() => handleComplete(), 500);
-    }
-  }, [isPuzzleSolved, pieces]);
-
   const handleDragStart = (position: number) => {
     setDraggedPiece(position);
   };
@@ -249,6 +243,15 @@ const JigsawPuzzle = () => {
             🎉 Puzzle completed!
           </div>
         )}
+
+        <Button
+          onClick={handleComplete}
+          disabled={!isPuzzleSolved}
+          className="w-full"
+          size="lg"
+        >
+          Submit Puzzle
+        </Button>
 
         <div className="bg-muted rounded-lg p-4 text-sm text-muted-foreground text-center">
           Click two pieces to swap their positions. Arrange them in order from 1 to {GRID_SIZE * GRID_SIZE}.
